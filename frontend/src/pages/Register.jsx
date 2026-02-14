@@ -8,6 +8,7 @@ const Register = () => {
         firstname: '',
         lastname: '',
         email: '',
+        phoneNumber: '',
         password: '',
         bloodGroup: '',
         location: '',
@@ -53,6 +54,10 @@ const Register = () => {
                 <div>
                     <label className="block text-sm font-medium text-gray-700">Email</label>
                     <input type="email" name="email" onChange={handleChange} required className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500" />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-gray-700">Phone Number</label>
+                    <input type="tel" name="phoneNumber" onChange={handleChange} required className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500" />
                 </div>
                 <div>
                     <label className="block text-sm font-medium text-gray-700">Password</label>

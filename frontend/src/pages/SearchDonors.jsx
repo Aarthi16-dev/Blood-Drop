@@ -23,6 +23,10 @@ const SearchDonors = () => {
         }
     };
 
+    const handleContact = (donor) => {
+        alert(`Contact Details:\nName: ${donor.name}\nPhone: ${donor.phoneNumber || 'Not available'}\nEmail: ${donor.email}`);
+    };
+
     return (
         <div className="space-y-6">
             <div className="bg-white p-6 rounded-lg shadow-md">
@@ -85,7 +89,10 @@ const SearchDonors = () => {
                             </span>
                         </div>
                         <div className="mt-4 pt-4 border-t border-gray-100">
-                            <button className="w-full bg-gray-100 text-gray-800 py-2 rounded hover:bg-gray-200 transition-colors">
+                            <button
+                                onClick={() => handleContact(donor)}
+                                className="w-full bg-gray-100 text-gray-800 py-2 rounded hover:bg-gray-200 transition-colors"
+                            >
                                 Contact Donor
                             </button>
                         </div>
