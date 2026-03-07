@@ -23,8 +23,10 @@ const Navbar = () => {
                         </Link>
                         <div className="hidden md:block ml-10">
                             <div className="flex items-baseline space-x-4">
-                                <Link to="/search-donors" className="hover:bg-red-700 px-3 py-2 rounded-md text-sm font-medium">Find Donors</Link>
-                                <Link to="/campaigns" className="hover:bg-red-700 px-3 py-2 rounded-md text-sm font-medium">Campaigns</Link>
+                                <Link to="/search-donors" className="hover:bg-red-700 px-3 py-2 rounded-md text-sm font-medium line-clamp-1">Find Donors</Link>
+                                <Link to="/blood-bank" className="hover:bg-red-700 px-3 py-2 rounded-md text-sm font-medium line-clamp-1">Blood Bank</Link>
+                                <Link to="/blood-request" className="hover:bg-red-700 px-3 py-2 rounded-md text-sm font-medium line-clamp-1">Request Blood</Link>
+                                <Link to="/campaigns" className="hover:bg-red-700 px-3 py-2 rounded-md text-sm font-medium line-clamp-1">Campaigns</Link>
                             </div>
                         </div>
                     </div>

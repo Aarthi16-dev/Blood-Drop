@@ -8,6 +8,8 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import SearchDonors from './pages/SearchDonors';
 import Campaigns from './pages/Campaigns';
+import BloodBank from './pages/BloodBank';
+import BloodRequest from './pages/BloodRequest';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useContext(AuthContext);
@@ -25,6 +27,15 @@ function App() {
             <Route index element={<Home />} />
             <Route path="login" element={<Login />} />
             <Route path="register" element={<Register />} />
+            <Route path="blood-bank" element={<BloodBank />} />
+            <Route
+              path="blood-request"
+              element={
+                <ProtectedRoute>
+                  <BloodRequest />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="search-donors"
               element={

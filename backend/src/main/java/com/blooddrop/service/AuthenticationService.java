@@ -30,8 +30,14 @@ public class AuthenticationService {
                                 .role(request.getRole() != null ? request.getRole() : Role.DONOR)
                                 .bloodGroup(request.getBloodGroup())
                                 .location(request.getLocation())
+                                .city(request.getCity())
                                 .latitude(request.getLatitude())
                                 .longitude(request.getLongitude())
+                                .age(request.getAge())
+                                .gender(request.getGender())
+                                .weight(request.getWeight())
+                                .lastDonationDate(request.getLastDonationDate())
+                                .healthIssues(request.getHealthIssues())
                                 .available(true)
                                 .build();
                 repository.save(user);

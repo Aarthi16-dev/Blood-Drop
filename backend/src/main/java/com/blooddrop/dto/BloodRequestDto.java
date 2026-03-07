@@ -18,12 +18,14 @@ public class BloodRequestDto {
     private String requesterName;
     private String patientName;
     private String bloodGroup;
+    private Integer unitsRequired;
     private String location;
+    private String city;
     private Double latitude;
     private Double longitude;
     private String contactNumber;
     private String hospitalName;
-    private boolean isUrgent;
+    private String urgency;
     private RequestStatus status;
     private LocalDateTime createdAt;
 }

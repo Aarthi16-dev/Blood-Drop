@@ -1,12 +1,19 @@
 import { useState, useEffect } from 'react';
 import api from '../services/api';
-import { Search, MapPin, Droplets } from 'lucide-react';
+import { Search, MapPin, Droplets, Phone, X } from 'lucide-react';
 
 const SearchDonors = () => {
     const [donors, setDonors] = useState([]);
     const [bloodGroup, setBloodGroup] = useState('');
     const [location, setLocation] = useState('');
     const [loading, setLoading] = useState(false);
+    const [selectedDonor, setSelectedDonor] = useState(null);
+    const [messageForm, setMessageForm] = useState({
+        senderName: '',
+        contactNumber: '',
+        message: ''
+    });
+    const [messageStatus, setMessageStatus] = useState('');
 
     const handleSearch = async (e) => {
         e.preventDefault();
@@ -23,8 +30,23 @@ const SearchDonors = () => {
         }
     };
 
-    const handleContact = (donor) => {
-        alert(`Contact Details:\nName: ${donor.name}\nPhone: ${donor.phoneNumber || 'Not available'}\nEmail: ${donor.email}`);
+    const handleSendMessage = async (e) => {
+        e.preventDefault();
+        try {
+            await api.post('/message/send', {
+                donorId: selectedDonor.id,
+                ...messageForm
+            });
+            setMessageStatus('Message sent successfully!');
+            setTimeout(() => {
+                setSelectedDonor(null);
+                setMessageStatus('');
+                setMessageForm({ senderName: '', contactNumber: '', message: '' });
+            }, 2000);
+        } catch (error) {
+            console.error("Failed to send message", error);
+            setMessageStatus('Failed to send message.');
+        }
     };
 
     return (
@@ -80,20 +102,28 @@ const SearchDonors = () => {
                         <div className="flex justify-between items-start mb-4">
                             <div>
                                 <h3 className="text-xl font-bold">{donor.name}</h3>
-                                <p className="text-gray-500 text-sm flex items-center gap-1">
-                                    <MapPin size={14} /> {donor.location}
+                                <p className="text-gray-500 text-sm flex items-center gap-1 mt-1">
+                                    <MapPin size={14} /> {donor.city || donor.location || 'Unknown'}
                                 </p>
+                                <p className="text-gray-500 text-sm flex items-center gap-1 mt-1">
+                                    <Phone size={14} /> {donor.phoneNumber || 'Not available'}
+                                </p>
+                                <div className="mt-2 text-sm">
+                                    <span className={`px-2 py-1 rounded-full text-xs font-bold ${donor.available ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                        {donor.available ? 'Available' : 'Not Available'}
+                                    </span>
+                                </div>
                             </div>
                             <span className="bg-red-100 text-red-800 text-lg font-bold px-3 py-1 rounded-full flex items-center gap-1">
                                 <Droplets size={16} /> {donor.bloodGroup}
                             </span>
                         </div>
-                        <div className="mt-4 pt-4 border-t border-gray-100">
+                        <div className="mt-4 pt-4 border-t border-gray-100 flex gap-2">
                             <button
-                                onClick={() => handleContact(donor)}
-                                className="w-full bg-gray-100 text-gray-800 py-2 rounded hover:bg-gray-200 transition-colors"
+                                onClick={() => setSelectedDonor(donor)}
+                                className="w-full bg-red-100 text-red-800 py-2 rounded font-semibold hover:bg-red-200 transition-colors"
                             >
-                                Contact Donor
+                                Send Message
                             </button>
                         </div>
                     </div>
@@ -104,6 +134,42 @@ const SearchDonors = () => {
                     </div>
                 )}
             </div>
+
+            {selectedDonor && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                    <div className="bg-white rounded-lg p-6 max-w-md w-full relative">
+                        <button 
+                            onClick={() => setSelectedDonor(null)}
+                            className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+                        >
+                            <X size={20} />
+                        </button>
+                        <h3 className="text-xl font-bold mb-4">Message to {selectedDonor.name}</h3>
+                        {messageStatus && (
+                            <div className={`mb-4 p-2 text-sm rounded ${messageStatus.includes('success') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                                {messageStatus}
+                            </div>
+                        )}
+                        <form onSubmit={handleSendMessage} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Your Name</label>
+                                <input required type="text" className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500" value={messageForm.senderName} onChange={e => setMessageForm({...messageForm, senderName: e.target.value})} />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Contact Number</label>
+                                <input required type="tel" className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500" value={messageForm.contactNumber} onChange={e => setMessageForm({...messageForm, contactNumber: e.target.value})} />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Message</label>
+                                <textarea required rows="4" className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500" value={messageForm.message} onChange={e => setMessageForm({...messageForm, message: e.target.value})} placeholder="e.g. Hello, I need O+ blood urgently..."></textarea>
+                            </div>
+                            <button type="submit" className="w-full bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors">
+                                Send Message
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

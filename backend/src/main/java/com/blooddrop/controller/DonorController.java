@@ -4,10 +4,7 @@ import com.blooddrop.entity.User;
 import com.blooddrop.service.DonorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -23,5 +20,12 @@ public class DonorController {
             @RequestParam(required = false) String bloodGroup,
             @RequestParam(required = false) String location) {
         return ResponseEntity.ok(donorService.searchDonors(bloodGroup, location));
+    }
+
+    @PutMapping("/{id}/availability")
+    public ResponseEntity<User> toggleAvailability(
+            @PathVariable Long id, 
+            @RequestParam boolean available) {
+        return ResponseEntity.ok(donorService.toggleAvailability(id, available));
     }
 }

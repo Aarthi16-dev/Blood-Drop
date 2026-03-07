@@ -15,12 +15,20 @@ public class DonorService {
     private final UserRepository userRepository;
 
     public List<User> searchDonors(String bloodGroup, String location) {
+        List<User> donors;
         if (bloodGroup != null && !bloodGroup.isEmpty()) {
-            return userRepository.findByBloodGroupAndRole(bloodGroup, Role.DONOR);
+            donors = userRepository.findByBloodGroupAndRole(bloodGroup, Role.DONOR);
         } else if (location != null && !location.isEmpty()) {
-            return userRepository.findByLocationContainingAndRole(location, Role.DONOR);
+            donors = userRepository.findByLocationContainingAndRole(location, Role.DONOR);
         } else {
-            return userRepository.findByRole(Role.DONOR);
+            donors = userRepository.findByRole(Role.DONOR);
         }
+        return donors.stream().filter(User::isAvailable).collect(java.util.stream.Collectors.toList());
+    }
+
+    public User toggleAvailability(Long id, boolean available) {
+        User donor = userRepository.findById(id).orElseThrow(() -> new RuntimeException("Donor not found"));
+        donor.setAvailable(available);
+        return userRepository.save(donor);
     }
 }

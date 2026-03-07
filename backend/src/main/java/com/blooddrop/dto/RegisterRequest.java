@@ -19,6 +19,13 @@ public class RegisterRequest {
     private Role role;
     private String bloodGroup;
     private String location;
+    private String city;
     private Double latitude;
     private Double longitude;
+
+    private Integer age;
+    private String gender;
+    private Double weight;
+    private java.time.LocalDate lastDonationDate;
+    private String healthIssues;
 }

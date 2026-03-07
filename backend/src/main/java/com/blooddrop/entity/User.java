@@ -38,8 +38,15 @@ public class User implements UserDetails {
 
     private String bloodGroup; // A+, B+, etc.
     private String location; // Could be lat,long or address string
+    private String city;
     private Double latitude;
     private Double longitude;
+
+    private Integer age;
+    private String gender;
+    private Double weight;
+    private java.time.LocalDate lastDonationDate;
+    private String healthIssues;
 
     private boolean available; // Only for donors
 
