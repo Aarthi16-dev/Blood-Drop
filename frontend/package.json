@@ -11,13 +11,15 @@
   },
   "dependencies": {
     "@react-google-maps/api": "^2.20.8",
+    "@stomp/stompjs": "^7.3.0",
     "axios": "^1.13.5",
     "chart.js": "^4.5.1",
     "lucide-react": "^0.563.0",
     "react": "^19.2.0",
     "react-chartjs-2": "^5.3.1",
     "react-dom": "^19.2.0",
-    "react-router-dom": "^7.13.0"
+    "react-router-dom": "^7.13.0",
+    "sockjs-client": "^1.6.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

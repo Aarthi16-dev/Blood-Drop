@@ -26,6 +26,7 @@ public class BloodRequestDto {
     private String contactNumber;
     private String hospitalName;
     private String urgency;
+    private boolean isUrgent;
     private RequestStatus status;
     private LocalDateTime createdAt;
 }

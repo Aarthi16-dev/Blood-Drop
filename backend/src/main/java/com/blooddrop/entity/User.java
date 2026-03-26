@@ -41,6 +41,7 @@ public class User implements UserDetails {
     private String city;
     private Double latitude;
     private Double longitude;
+    private String pincode;
 
     private Integer age;
     private String gender;
@@ -49,6 +50,13 @@ public class User implements UserDetails {
     private String healthIssues;
 
     private boolean available; // Only for donors
+
+    @Builder.Default
+    private Integer totalDonations = 0;
+
+    private String otp;
+    @Builder.Default
+    private boolean isVerified = true;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -23,45 +23,45 @@ function App() {
     <Router>
       <AuthProvider>
         <Routes>
-          <Route path="/" element={<Layout />}>
-            <Route index element={<Home />} />
-            <Route path="login" element={<Login />} />
-            <Route path="register" element={<Register />} />
-            <Route path="blood-bank" element={<BloodBank />} />
-            <Route
-              path="blood-request"
-              element={
-                <ProtectedRoute>
-                  <BloodRequest />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="search-donors"
-              element={
-                <ProtectedRoute>
-                  <SearchDonors />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="campaigns"
-              element={
-                <ProtectedRoute>
-                  <Campaigns />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="dashboard"
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
-          </Route>
-        </Routes>
+            <Route path="/" element={<Layout />}>
+              <Route index element={<Home />} />
+              <Route path="login" element={<Login />} />
+              <Route path="register" element={<Register />} />
+              <Route path="blood-bank" element={<BloodBank />} />
+              <Route
+                path="blood-request"
+                element={
+                  <ProtectedRoute>
+                    <BloodRequest />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="search-donors"
+                element={
+                  <ProtectedRoute>
+                    <SearchDonors />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="campaigns"
+                element={
+                  <ProtectedRoute>
+                    <Campaigns />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="dashboard"
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
+            </Route>
+          </Routes>
       </AuthProvider>
     </Router>
   );

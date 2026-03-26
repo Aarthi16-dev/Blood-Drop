@@ -20,7 +20,11 @@ public class Message {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String senderName;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sender_id")
+    private User sender;
+
+    private String senderName; // Keep for backward compatibility/quick display
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "donor_id")

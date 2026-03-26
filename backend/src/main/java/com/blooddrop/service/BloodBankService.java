@@ -14,7 +14,15 @@ public class BloodBankService {
     private final BloodBankRepository bloodBankRepository;
 
     public BloodBank addBloodBank(BloodBank bloodBank) {
-        return bloodBankRepository.save(bloodBank);
+        return bloodBankRepository.findByBankNameAndCityAndBloodGroup(
+                bloodBank.getBankName(), 
+                bloodBank.getCity(), 
+                bloodBank.getBloodGroup()
+        ).map(existing -> {
+            existing.setAvailableUnits(bloodBank.getAvailableUnits());
+            existing.setLastUpdatedDate(bloodBank.getLastUpdatedDate());
+            return bloodBankRepository.save(existing);
+        }).orElseGet(() -> bloodBankRepository.save(bloodBank));
     }
 
     public List<BloodBank> getAllBloodBanks() {

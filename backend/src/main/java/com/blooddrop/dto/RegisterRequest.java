@@ -28,4 +28,5 @@ public class RegisterRequest {
     private Double weight;
     private java.time.LocalDate lastDonationDate;
     private String healthIssues;
+    private String pincode;
 }

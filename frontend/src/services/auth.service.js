@@ -8,6 +8,10 @@ const register = (userData) => {
     return api.post('/auth/register', userData);
 };
 
+const getProfile = () => {
+    return api.get('/auth/me');
+};
+
 const getCurrentUser = () => {
     return JSON.parse(localStorage.getItem('user'));
 };
@@ -20,6 +24,7 @@ const logout = () => {
 export default {
     login,
     register,
+    getProfile,
     getCurrentUser,
     logout,
 };

@@ -34,8 +34,14 @@ public class BloodRequest {
     private String hospitalName;
     private String urgency;
 
+    @Builder.Default
+    @Column(name = "is_urgent", nullable = false)
+    private boolean isUrgent = false;
+
+    @Builder.Default
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private RequestStatus status; // pending, fulfilled, cancelled
+    private RequestStatus status = RequestStatus.PENDING; // pending, fulfilled, cancelled
 
     private LocalDateTime createdAt;
 
@@ -44,6 +50,10 @@ public class BloodRequest {
         createdAt = LocalDateTime.now();
         if (status == null) {
             status = RequestStatus.PENDING;
+        }
+        // Force is_urgent based on urgency string if set
+        if ("HIGH".equalsIgnoreCase(urgency)) {
+            isUrgent = true;
         }
     }
 }

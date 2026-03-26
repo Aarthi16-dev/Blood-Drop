@@ -1,11 +1,12 @@
 import { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { LogIn } from 'lucide-react';
+import { LogIn, Eye, EyeOff } from 'lucide-react';
 
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const { login } = useContext(AuthContext);
     const navigate = useNavigate();
     const [error, setError] = useState('');
@@ -16,7 +17,12 @@ const Login = () => {
             await login(email, password);
             navigate('/dashboard');
         } catch (err) {
-            setError('Invalid email or password');
+            if (err.response?.data?.message?.toLowerCase().includes('verified') || 
+                err.response?.data?.toLowerCase().includes('verified')) {
+                setError('Account not verified. Please check your email for OTP.');
+            } else {
+                setError('Invalid email or password');
+            }
         }
     };
 
@@ -41,13 +47,22 @@ const Login = () => {
                 </div>
                 <div>
                     <label className="block text-sm font-medium text-gray-700">Password</label>
-                    <input
-                        type="password"
-                        required
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                    />
+                    <div className="mt-1 relative rounded-md shadow-sm">
+                        <input
+                            type={showPassword ? "text" : "password"}
+                            required
+                            className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-500 focus:border-red-500"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
+                        <button
+                            type="button"
+                            className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
+                            onClick={() => setShowPassword(!showPassword)}
+                        >
+                            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </button>
+                    </div>
                 </div>
                 <button
                     type="submit"

@@ -16,8 +16,8 @@ const Home = () => {
                     <Link to="/register" className="px-8 py-3 bg-red-600 text-white font-bold rounded-lg shadow-lg hover:bg-red-700 transition transform hover:scale-105">
                         Register as Donor
                     </Link>
-                    <Link to="/requests" className="px-8 py-3 bg-white text-red-600 border border-red-600 font-bold rounded-lg shadow-md hover:bg-red-50 transition transform hover:scale-105">
-                        Find Blood
+                    <Link to="/search-donors" className="px-8 py-3 bg-white text-red-600 border border-red-600 font-bold rounded-lg shadow-md hover:bg-red-50 transition transform hover:scale-105">
+                        Find Donors
                     </Link>
                 </div>
             </section>
