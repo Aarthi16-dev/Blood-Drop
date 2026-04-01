@@ -60,4 +60,9 @@ public CorsConfigurationSource corsConfigurationSource() {
     source.registerCorsConfiguration("/**", configuration);
 
     return source;
+<<<<<<< HEAD
 }}
+=======
+}
+}
+>>>>>>> 49313cc (show detailed error)
