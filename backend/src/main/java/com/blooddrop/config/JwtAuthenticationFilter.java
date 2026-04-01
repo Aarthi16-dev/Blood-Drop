@@ -27,12 +27,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 protected void doFilterInternal(
         @NonNull HttpServletRequest request,
         @NonNull HttpServletResponse response,
-        @NonNull FilterChain filterChain) throws ServletException, IOException {
+        @NonNull FilterChain filterChain)
+        throws ServletException, IOException {
 
-    String path = request.getServletPath();
+    // 👇 ADD THIS PART AT THE TOP
+    String path = request.getRequestURI();
 
-    // 🔥 Skip JWT for auth APIs
-    if (path.startsWith("/api/v1/auth/")) {
+    if (path.contains("/api/v1/auth/")) {
         filterChain.doFilter(request, response);
         return;
     }
