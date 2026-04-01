@@ -31,12 +31,12 @@ protected void doFilterInternal(
         throws ServletException, IOException {
 
     // 👇 ADD THIS PART AT THE TOP
-    String path = request.getRequestURI();
+   String servletPath = request.getServletPath();
 
-    if (path.contains("/api/v1/auth/")) {
-        filterChain.doFilter(request, response);
-        return;
-    }
+if (servletPath.startsWith("/api/v1/auth/")) {
+    filterChain.doFilter(request, response);
+    return;
+}
 
     final String authHeader = request.getHeader("Authorization");
     final String jwt;

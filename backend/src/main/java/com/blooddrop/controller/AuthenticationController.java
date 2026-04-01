@@ -18,6 +18,10 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 public class AuthenticationController {
 
     private final AuthenticationService service;
+    @GetMapping("/test")
+    public String test() {
+        return "working";
+    }
 
    @PostMapping("/register")
 public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
@@ -34,11 +38,16 @@ public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
 }
 
     @PostMapping("/authenticate")
-    public ResponseEntity<AuthenticationResponse> authenticate(
-            @RequestBody AuthenticationRequest request) {
-        System.out.println("Controller: Authenticate request for " + request.getEmail());
+public ResponseEntity<?> authenticate(@RequestBody AuthenticationRequest request) {
+    System.out.println("Controller: Authenticate request for " + request.getEmail());
+
+    try {
         return ResponseEntity.ok(service.authenticate(request));
+    } catch (Exception e) {
+        e.printStackTrace();
+        return ResponseEntity.status(403).body(e.getMessage());
     }
+}
 
     @GetMapping("/me")
     public ResponseEntity<com.blooddrop.entity.User> getCurrentUser(
