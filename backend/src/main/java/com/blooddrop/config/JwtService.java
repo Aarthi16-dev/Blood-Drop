@@ -74,8 +74,8 @@ public class JwtService {
                 .getBody();
     }
 
-   private Key getSignInKey() {
-    byte[] keyBytes = hexStringToByteArray(secretKey);
+private Key getSignInKey() {
+    byte[] keyBytes = secretKey.getBytes();
     return Keys.hmacShaKeyFor(keyBytes);
 }
 
