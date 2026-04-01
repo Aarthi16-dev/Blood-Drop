@@ -43,7 +43,7 @@ public class SecurityConfiguration {
     }
 
     @Bean
-public CorsConfigurationSource corsConfigurationSource() {
+    public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
 
     configuration.setAllowedOrigins(List.of(
@@ -60,9 +60,7 @@ public CorsConfigurationSource corsConfigurationSource() {
     source.registerCorsConfiguration("/**", configuration);
 
     return source;
-<<<<<<< HEAD
-}}
-=======
 }
 }
->>>>>>> 49313cc (show detailed error)
+
+
