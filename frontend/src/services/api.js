@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: 'https://blood-drop-1.onrender.com/api/v1',
-    timeout: 10000,
+   baseURL: 'https://blood-drop-4.onrender.com/api/v1',
+    
     headers: {
         'Content-Type': 'application/json',
     },
