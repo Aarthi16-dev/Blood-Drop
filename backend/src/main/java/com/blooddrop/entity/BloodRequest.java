@@ -1,59 +1,23 @@
-package com.blooddrop.entity;
+public BloodRequestDto createRequest(BloodRequestDto dto) {
 
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import java.time.LocalDateTime;
+    User requester = userRepository.findById(dto.getRequesterId())
+            .orElseThrow(() -> new RuntimeException("User not found"));
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@Entity
-@Table(name = "blood_requests")
-public class BloodRequest {
+    BloodRequest request = BloodRequest.builder()
+            .requester(requester)
+            .patientName(dto.getPatientName())
+            .bloodGroup(dto.getBloodGroup())
+            .unitsRequired(dto.getUnitsRequired())
+            .location(dto.getLocation())
+            .city(dto.getCity())
+            .latitude(dto.getLatitude())
+            .longitude(dto.getLongitude())
+            .contactNumber(dto.getContactNumber())
+            .hospitalName(dto.getHospitalName())
+            .urgency(dto.getUrgency())
+            .build();
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    BloodRequest saved = bloodRequestRepository.save(request);
 
-    @ManyToOne
-    @JoinColumn(name = "requester_id")
-    private User requester;
-
-    private String patientName;
-    private String bloodGroup;
-    private Integer unitsRequired;
-    private String location;
-    private String city;
-    private Double latitude;
-    private Double longitude;
-    private String contactNumber;
-    private String hospitalName;
-    private String urgency;
-
-    @Builder.Default
-    @Column(name = "is_urgent", nullable = false)
-    private boolean isUrgent = false;
-
-    @Builder.Default
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private RequestStatus status = RequestStatus.PENDING; // pending, fulfilled, cancelled
-
-    private LocalDateTime createdAt;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        if (status == null) {
-            status = RequestStatus.PENDING;
-        }
-        // Force is_urgent based on urgency string if set
-        if ("HIGH".equalsIgnoreCase(urgency)) {
-            isUrgent = true;
-        }
-    }
+    return mapToDto(saved);
 }
