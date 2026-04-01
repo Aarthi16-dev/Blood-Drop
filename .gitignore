@@ -1,25 +1,23 @@
-# Ignore Java compiled classes
-*.class# 
-Spring Boot
+# Spring Boot
 target/
+*.log
+
+# Backend
+/backend/target/
+backend/target/
+
+# Maven
 .mvn/
 mvnw
 mvnw.cmd
+
+# IDE
 .idea/
 .vscode/
 *.iml
-
-# React 
-node_modules/
-dist/
-.env
-
-# OS files
 .DS_Store
 
-# Logs 
-*.log
-
-#Build
-build/
-out/
+# React
+frontend/node_modules/
+frontend/dist/
+frontend/.env 
