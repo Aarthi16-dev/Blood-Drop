@@ -21,3 +21,12 @@ public class MessageDTO {
     private LocalDateTime sentDate;
     private String contactNumber;
 }
+class TestApp {
+    public static void main(String[] args) {
+        MessageDTO dto = MessageDTO.builder()
+                .message("Hello")
+                .build();
+
+        System.out.println(dto.getMessage());
+    }
+}
