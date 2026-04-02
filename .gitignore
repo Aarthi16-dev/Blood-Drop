@@ -1,12 +1,11 @@
 # Spring Boot
-/backend/target/
-/backend/**/mvnw
-/backend/**/mvnw.cmd
-/backend/.mvn/
-/backend/.idea/
-/backend/*.iml
-/backend/.vscode/
-/backend/.DS_Store
+target/
+*.log
+.mvn/
+.idea/
+.vscode/
+*.iml
+.DS_Store
 
 # React
 /frontend/node_modules/
