@@ -33,50 +33,31 @@ public class WebSocketAuthInterceptor implements WebSocketMessageBrokerConfigure
         registration.interceptors(new ChannelInterceptor() {
             @Override
             public Message<?> preSend(Message<?> message, MessageChannel channel) {
-
-                StompHeaderAccessor accessor =
-                        MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+                StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
                 if (accessor != null && StompCommand.CONNECT.equals(accessor.getCommand())) {
-
                     List<String> tokenHeaders = accessor.getNativeHeader("Authorization");
-
                     if (tokenHeaders != null && !tokenHeaders.isEmpty()) {
-
                         String token = tokenHeaders.get(0);
-
                         if (token.startsWith("Bearer ")) {
                             token = token.substring(7);
                         }
-
                         try {
                             String email = jwtService.extractUsername(token);
-
                             if (email != null) {
-
                                 User user = userRepository.findByEmail(email).orElse(null);
-
                                 if (user != null && jwtService.isTokenValid(token, user)) {
-
                                     UsernamePasswordAuthenticationToken auth =
-                                            new UsernamePasswordAuthenticationToken(
-                                                    user,
-                                                    null,
-                                                    user.getAuthorities());
-
+                                            new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
                                     accessor.setUser(auth);
-
-                                    log.info("WebSocket authenticated user: {} (ID: {})",
-                                            email, user.getId());
+                                    log.info("WebSocket authenticated user: {} (ID: {})", email, user.getId());
                                 }
                             }
-
                         } catch (Exception e) {
                             log.error("WebSocket auth failed: {}", e.getMessage());
                         }
                     }
                 }
-
                 return message;
             }
         });

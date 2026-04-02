@@ -1,23 +1,22 @@
 # Spring Boot
-target/
-*.log
-
-# Backend
 /backend/target/
-backend/target/
+/backend/**/mvnw
+/backend/**/mvnw.cmd
+/backend/.mvn/
+/backend/.idea/
+/backend/*.iml
+/backend/.vscode/
+/backend/.DS_Store
 
-# Maven
-.mvn/
-mvnw
-mvnw.cmd
+# React
+/frontend/node_modules/
+/frontend/dist/
+/frontend/.env
+/frontend/.DS_Store
+/frontend/.vscode/
 
-# IDE
+# IDEs
 .idea/
 .vscode/
 *.iml
-.DS_Store
-
-# React
-frontend/node_modules/
-frontend/dist/
-frontend/.env 
+*.log
