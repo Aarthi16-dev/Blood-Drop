@@ -2,20 +2,19 @@
 target/
 *.log
 .mvn/
-.idea/
-.vscode/
-*.iml
-.DS_Store
+
+# Environment
+.env
 
 # React
-/frontend/node_modules/
-/frontend/dist/
-/frontend/.env
-/frontend/.DS_Store
-/frontend/.vscode/
+frontend/node_modules/
+frontend/dist/
+frontend/.env
 
 # IDEs
 .idea/
 .vscode/
 *.iml
-*.log
+
+# OS
+.DS_Store
