@@ -1,20 +1,23 @@
 # Spring Boot
 target/
 *.log
-.mvn/
 
-# Environment
-.env
+# Backend
+/backend/target/
+backend/target/
+
+# Maven
+.mvn/
+mvnw
+mvnw.cmd
+
+# IDE
+.idea/
+.vscode/
+*.iml
+.DS_Store
 
 # React
 frontend/node_modules/
 frontend/dist/
-frontend/.env
-
-# IDEs
-.idea/
-.vscode/
-*.iml
-
-# OS
-.DS_Store
+frontend/.env 

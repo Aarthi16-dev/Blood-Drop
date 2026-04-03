@@ -30,8 +30,9 @@ public class SecurityConfiguration {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll() // ✅ ADD THIS
-                        .requestMatchers("/").permitAll()   // ✅ ADD THIS LINE
+                        // ✅ IMPORTANT: allow preflight requests
+                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
+
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/donors/search").permitAll()
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/ws/**").permitAll()
@@ -49,13 +50,14 @@ public class SecurityConfiguration {
         CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.setAllowedOrigins(List.of(
-        "http://localhost:5173",
-        "http://localhost:5174",
-        "https://blood-drop-theta.vercel.app" // ✅ ADD THIS
-));
+            "http://localhost:5173",
+            "http://localhost:5174",
+            "https://blood-drop-giz2ehrnl-aarthi16-devs-projects.vercel.app"
+        ));
 
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
+        configuration.setExposedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
@@ -64,3 +66,7 @@ public class SecurityConfiguration {
         return source;
     }
 }
+
+
+
+
