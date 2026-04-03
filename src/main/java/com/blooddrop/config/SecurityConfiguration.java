@@ -30,6 +30,7 @@ public class SecurityConfiguration {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll() // ✅ ADD THIS
                         .requestMatchers("/").permitAll()   // ✅ ADD THIS LINE
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/donors/search").permitAll()
                         .requestMatchers("/api/v1/auth/**").permitAll()
@@ -48,10 +49,10 @@ public class SecurityConfiguration {
         CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.setAllowedOrigins(List.of(
-                "http://localhost:5173",
-                "http://localhost:5174",
-                "https://blood-drop-giz2ehrnl-aarthi16-devs-projects.vercel.app"
-        ));
+        "http://localhost:5173",
+        "http://localhost:5174",
+        "https://blood-drop-theta.vercel.app" // ✅ ADD THIS
+));
 
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
