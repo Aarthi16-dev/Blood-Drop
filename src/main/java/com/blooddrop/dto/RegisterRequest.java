@@ -6,27 +6,34 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class RegisterRequest {
-    private String firstname;
-    private String lastname;
+
+    private String firstName;
+    private String lastName;
     private String email;
     private String phoneNumber;
     private String password;
+
     private Role role;
     private String bloodGroup;
-    private String location;
+
     private String city;
-    private Double latitude;
-    private Double longitude;
+    private String pinCode;
 
     private Integer age;
     private String gender;
     private Double weight;
-    private java.time.LocalDate lastDonationDate;
     private String healthIssues;
-    private String pincode;
+
+    // Optional (can be ignored from frontend)
+    private String location;
+    private Double latitude;
+    private Double longitude;
+    private LocalDate lastDonationDate;
 }
