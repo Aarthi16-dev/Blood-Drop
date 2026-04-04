@@ -30,10 +30,10 @@ public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
         return ResponseEntity.ok(service.register(request));
     } catch (IllegalArgumentException e) {
         e.printStackTrace();
-        return ResponseEntity.badRequest().body(e.getMessage());
+        System.err.println("API Error: " + e.getMessage()); e.printStackTrace(); return ResponseEntity.badRequest().body("Error: " + e.getMessage());
     } catch (Exception e) {
         e.printStackTrace(); // 👈 ADD THIS
-        return ResponseEntity.badRequest().body(e.getMessage()); // 👈 CHANGE THIS
+        System.err.println("API Error: " + e.getMessage()); e.printStackTrace(); return ResponseEntity.badRequest().body("Error: " + e.getMessage()); // 👈 CHANGE THIS
     }
 }
 
