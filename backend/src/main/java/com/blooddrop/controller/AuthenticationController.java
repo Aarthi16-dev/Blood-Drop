@@ -11,7 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
-@CrossOrigin(origins = "https://blood-drop-giz2ehrnl-aarthi16-devs-projects.vercel.app")
+@CrossOrigin(originPatterns = "*", allowCredentials = "true")
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
