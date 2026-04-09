@@ -74,8 +74,18 @@ public class JwtService {
     }
 
     private Key getSignInKey() {
-        byte[] keyBytes = hexStringToByteArray(secretKey);
-        return Keys.hmacShaKeyFor(keyBytes);
+        if (secretKey == null || secretKey.length() < 64) {
+            // Fallback or warning if the key is too short (256 bits = 32 bytes = 64 hex chars)
+            System.err.println("WARNING: JWT secret key is too short. It must be at least 64 hex characters (256 bits). using provided secret as raw bytes.");
+            return Keys.hmacShaKeyFor(secretKey.getBytes());
+        }
+        try {
+            byte[] keyBytes = hexStringToByteArray(secretKey);
+            return Keys.hmacShaKeyFor(keyBytes);
+        } catch (Exception e) {
+            System.err.println("ERROR: Failed to decode hex secret key, falling back to raw bytes.");
+            return Keys.hmacShaKeyFor(secretKey.getBytes());
+        }
     }
 
     // Helper to convert hex string to byte array since secret is hex
