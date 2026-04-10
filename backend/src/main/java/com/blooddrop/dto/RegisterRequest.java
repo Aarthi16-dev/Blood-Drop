@@ -1,6 +1,7 @@
 package com.blooddrop.dto;
 
 import com.blooddrop.entity.Role;
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,15 +14,24 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class RegisterRequest {
     @JsonProperty("firstname")
+    @JsonAlias("firstName")
     private String firstname;
+
     @JsonProperty("lastname")
+    @JsonAlias("lastName")
     private String lastname;
+
     private String email;
+
     @JsonProperty("phoneNumber")
+    @JsonAlias("phonenumber")
     private String phoneNumber;
+
     private String password;
     private Role role;
+
     @JsonProperty("bloodGroup")
+    @JsonAlias("bloodgroup")
     private String bloodGroup;
     private String location;
     @JsonProperty("city")
@@ -35,5 +45,6 @@ public class RegisterRequest {
     private java.time.LocalDate lastDonationDate;
     private String healthIssues;
     @JsonProperty("pincode")
+    @JsonAlias("pinCode")
     private String pincode;
 }

@@ -25,6 +25,9 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
 
     public AuthenticationResponse register(RegisterRequest request) {
+        log.info("Incoming registration request for email: {}", request.getEmail());
+        log.info("Payload details: firstname={}, lastname={}, phone={}, role={}, city={}", 
+            request.getFirstname(), request.getLastname(), request.getPhoneNumber(), request.getRole(), request.getCity());
 
         var user = User.builder()
                 .name(request.getFirstname() + " " + request.getLastname())

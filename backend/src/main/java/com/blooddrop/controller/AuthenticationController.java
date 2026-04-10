@@ -23,14 +23,14 @@ public class AuthenticationController {
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
         try {
             return ResponseEntity.ok(service.register(request));
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-            System.err.println("Registration error: " + e.getMessage());
-            return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
-            System.err.println("Registration error: " + e.getMessage());
-            return ResponseEntity.badRequest().body(e.getMessage());
+            String errorMessage = "Registration failed: " + e.getMessage();
+            if (e.getCause() != null) {
+                errorMessage += " | Cause: " + e.getCause().getMessage();
+            }
+            System.err.println(errorMessage);
+            return ResponseEntity.badRequest().body(errorMessage);
         }
     }
 
