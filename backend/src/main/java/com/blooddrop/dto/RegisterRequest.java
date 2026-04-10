@@ -12,9 +12,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RegisterRequest {
-    @JsonProperty("firstName")
+    @JsonProperty("firstname")
     private String firstname;
-    @JsonProperty("lastName")
+    @JsonProperty("lastname")
     private String lastname;
     private String email;
     @JsonProperty("phoneNumber")
@@ -34,6 +34,6 @@ public class RegisterRequest {
     private Double weight;
     private java.time.LocalDate lastDonationDate;
     private String healthIssues;
-    @JsonProperty("pinCode")
+    @JsonProperty("pincode")
     private String pincode;
 }
