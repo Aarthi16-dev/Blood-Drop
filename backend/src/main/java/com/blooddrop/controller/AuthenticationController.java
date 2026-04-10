@@ -60,4 +60,9 @@ public class AuthenticationController {
 
         return ResponseEntity.ok(response);
     }
-}
+
+    @GetMapping("/health-check")
+    public ResponseEntity<String> healthCheck() {
+        return ResponseEntity.ok("Server is Healthy");
+    }
+}
