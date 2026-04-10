@@ -29,17 +29,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain) throws ServletException, IOException {
 
-        // ✅ Skip filter for auth endpoints
-        String path = request.getServletPath();
-                // ✅ Skip ONLY public auth endpoints (registration, login, test)
-        // This ensures the /me endpoint can still be authenticated to load profiles
-        if (path.equals("/api/v1/auth/register") || 
-            path.equals("/api/v1/auth/authenticate") || 
-            path.equals("/api/v1/auth/test")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
         final String userEmail;
