@@ -1,9 +1,11 @@
 package com.blooddrop.entity;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -22,7 +24,13 @@ public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Getter(AccessLevel.NONE)
     private Long id;
+
+    /** Explicit getter so IDEs resolve it without Lombok processing; Lombok @Data skips this field. */
+    public Long getId() {
+        return id;
+    }
 
     private String name;
 
