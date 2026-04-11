@@ -88,4 +88,8 @@ public class AuthenticationService {
         return repository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
     }
+
+    public long getUserCount() {
+        return repository.count();
+    }
 }
