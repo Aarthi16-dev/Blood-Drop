@@ -50,6 +50,11 @@ public class AuthenticationService {
                 .isVerified(true)
                 .build();
 
+        if (repository.existsByEmail(request.getEmail())) {
+            log.warn("Registration failed: Email {} already exists", request.getEmail());
+            throw new RuntimeException("This email is already registered. Please login or use a different email.");
+        }
+
         User savedUser = repository.save(user);
 
         var jwtToken = jwtService.generateToken(savedUser);

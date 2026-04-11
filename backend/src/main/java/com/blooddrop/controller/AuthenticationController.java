@@ -62,7 +62,12 @@ public class AuthenticationController {
     }
 
     @GetMapping("/health-check")
-    public ResponseEntity<String> healthCheck() {
-        return ResponseEntity.ok("Server is Healthy");
+    public ResponseEntity<java.util.Map<String, Object>> healthCheck() {
+        return ResponseEntity.ok(java.util.Map.of(
+            "status", "UP",
+            "server", "Blood-Drop-Production",
+            "totalUsers", service.getUserCount(),
+            "timestamp", java.time.LocalDateTime.now().toString()
+        ));
     }
 }
