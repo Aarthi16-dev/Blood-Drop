@@ -1,6 +1,6 @@
 package com.blooddrop.config;
 
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -17,20 +17,25 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import jakarta.servlet.http.HttpServletResponse;
 
-import java.util.List;
 import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-@RequiredArgsConstructor
 public class SecurityConfiguration {
 
-    @org.springframework.beans.factory.annotation.Value("${app.cors.allowed-origins}")
-    private String allowedOrigins;
-
+    private final String allowedOrigins;
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
+
+    public SecurityConfiguration(
+            @Value("${app.cors.allowed-origins}") String allowedOrigins,
+            JwtAuthenticationFilter jwtAuthFilter,
+            AuthenticationProvider authenticationProvider) {
+        this.allowedOrigins = allowedOrigins;
+        this.jwtAuthFilter = jwtAuthFilter;
+        this.authenticationProvider = authenticationProvider;
+    }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {

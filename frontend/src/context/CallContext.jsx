@@ -3,6 +3,7 @@ import { AuthContext } from './AuthContext';
 import SockJS from 'sockjs-client/dist/sockjs';
 import { Client } from '@stomp/stompjs';
 
+// eslint-disable-next-line react-refresh/only-export-components -- context + provider stay together for this app
 export const CallContext = createContext();
 
 const ICE_SERVERS = {
@@ -30,83 +31,35 @@ export const CallProvider = ({ children }) => {
     const callTimer = useRef(null);
     const pendingCandidates = useRef([]);
 
-    // Connect to WebSocket when user is available
-    useEffect(() => {
-        if (!user?.id) return;
+    const cleanup = useCallback(() => {
+        if (callTimer.current) {
+            clearInterval(callTimer.current);
+            callTimer.current = null;
+        }
+        if (localStream.current) {
+            localStream.current.getTracks().forEach(track => track.stop());
+            localStream.current = null;
+        }
+        if (peerConnection.current) {
+            peerConnection.current.close();
+            peerConnection.current = null;
+        }
+        remoteStream.current = null;
+        pendingCandidates.current = [];
+        setCallState('idle');
+        setRemoteUser(null);
+        setCallType(null);
+        setIsMuted(false);
+        setIsVideoOff(false);
+        setCallDuration(0);
+    }, []);
 
-        const token = localStorage.getItem('token');
-        if (!token) return;
-
-        const client = new Client({
-            webSocketFactory: () => new SockJS('http://localhost:8080/ws'),
-            connectHeaders: {
-                Authorization: `Bearer ${token}`
-            },
-            reconnectDelay: 5000,
-            onConnect: () => {
-                console.log('WebSocket connected for calling');
-
-                // Listen for incoming calls
-                client.subscribe(`/user/${user.id}/queue/incoming-call`, (message) => {
-                    const data = JSON.parse(message.body);
-                    console.log('Incoming call:', data);
-                    setRemoteUser({ id: data.callerUserId, name: data.callerName });
-                    setCallType(data.callType || 'video');
-                    setCallState('incoming');
-                });
-
-                // Call accepted
-                client.subscribe(`/user/${user.id}/queue/call-accepted`, (message) => {
-                    const data = JSON.parse(message.body);
-                    console.log('Call accepted:', data);
-                    startWebRTC(true);
-                });
-
-                // Call declined
-                client.subscribe(`/user/${user.id}/queue/call-declined`, () => {
-                    console.log('Call declined');
-                    cleanup();
-                    alert('Call was declined.');
-                });
-
-                // WebRTC offer
-                client.subscribe(`/user/${user.id}/queue/webrtc-offer`, async (message) => {
-                    const data = JSON.parse(message.body);
-                    console.log('Received WebRTC offer');
-                    await handleOffer(data);
-                });
-
-                // WebRTC answer
-                client.subscribe(`/user/${user.id}/queue/webrtc-answer`, async (message) => {
-                    const data = JSON.parse(message.body);
-                    console.log('Received WebRTC answer');
-                    await handleAnswer(data);
-                });
-
-                // ICE candidate
-                client.subscribe(`/user/${user.id}/queue/ice-candidate`, async (message) => {
-                    const data = JSON.parse(message.body);
-                    await handleIceCandidate(data);
-                });
-
-                // Call ended
-                client.subscribe(`/user/${user.id}/queue/call-ended`, () => {
-                    console.log('Call ended by remote');
-                    cleanup();
-                });
-            },
-            onStompError: (frame) => {
-                console.error('STOMP error:', frame);
-            }
-        });
-
-        client.activate();
-        stompClient.current = client;
-
-        return () => {
-            if (client.active) client.deactivate();
-        };
-    }, [user?.id]);
+    const startTimer = useCallback(() => {
+        setCallDuration(0);
+        callTimer.current = setInterval(() => {
+            setCallDuration(prev => prev + 1);
+        }, 1000);
+    }, []);
 
     const createPeerConnection = useCallback(() => {
         const pc = new RTCPeerConnection(ICE_SERVERS);
@@ -144,9 +97,9 @@ export const CallProvider = ({ children }) => {
 
         peerConnection.current = pc;
         return pc;
-    }, [remoteUser]);
+    }, [remoteUser, cleanup, startTimer]);
 
-    const getMediaStream = async (type) => {
+    const getMediaStream = useCallback(async (type) => {
         const constraints = {
             audio: true,
             video: type === 'video' ? { width: 640, height: 480 } : false
@@ -163,37 +116,9 @@ export const CallProvider = ({ children }) => {
             alert('Could not access camera/microphone. Please allow permissions.');
             throw err;
         }
-    };
+    }, []);
 
-    const startWebRTC = async (isCaller) => {
-        try {
-            const stream = await getMediaStream(callType);
-            const pc = createPeerConnection();
-
-            stream.getTracks().forEach(track => {
-                pc.addTrack(track, stream);
-            });
-
-            if (isCaller) {
-                const offer = await pc.createOffer();
-                await pc.setLocalDescription(offer);
-                stompClient.current.publish({
-                    destination: '/app/webrtc-offer',
-                    body: JSON.stringify({
-                        targetUserId: remoteUser?.id,
-                        sdp: pc.localDescription
-                    })
-                });
-            }
-
-            setCallState('connected');
-        } catch (err) {
-            console.error('WebRTC start failed:', err);
-            cleanup();
-        }
-    };
-
-    const handleOffer = async (data) => {
+    const handleOffer = useCallback(async (data) => {
         try {
             const stream = await getMediaStream(callType);
             const pc = createPeerConnection();
@@ -223,9 +148,9 @@ export const CallProvider = ({ children }) => {
         } catch (err) {
             console.error('Handle offer failed:', err);
         }
-    };
+    }, [callType, remoteUser, createPeerConnection, getMediaStream]);
 
-    const handleAnswer = async (data) => {
+    const handleAnswer = useCallback(async (data) => {
         try {
             if (peerConnection.current) {
                 await peerConnection.current.setRemoteDescription(new RTCSessionDescription(data.sdp));
@@ -239,9 +164,9 @@ export const CallProvider = ({ children }) => {
         } catch (err) {
             console.error('Handle answer failed:', err);
         }
-    };
+    }, []);
 
-    const handleIceCandidate = async (data) => {
+    const handleIceCandidate = useCallback(async (data) => {
         try {
             if (peerConnection.current && peerConnection.current.remoteDescription) {
                 await peerConnection.current.addIceCandidate(new RTCIceCandidate(data.candidate));
@@ -251,37 +176,131 @@ export const CallProvider = ({ children }) => {
         } catch (err) {
             console.error('ICE candidate error:', err);
         }
-    };
-
-    const startTimer = () => {
-        setCallDuration(0);
-        callTimer.current = setInterval(() => {
-            setCallDuration(prev => prev + 1);
-        }, 1000);
-    };
-
-    const cleanup = useCallback(() => {
-        if (callTimer.current) {
-            clearInterval(callTimer.current);
-            callTimer.current = null;
-        }
-        if (localStream.current) {
-            localStream.current.getTracks().forEach(track => track.stop());
-            localStream.current = null;
-        }
-        if (peerConnection.current) {
-            peerConnection.current.close();
-            peerConnection.current = null;
-        }
-        remoteStream.current = null;
-        pendingCandidates.current = [];
-        setCallState('idle');
-        setRemoteUser(null);
-        setCallType(null);
-        setIsMuted(false);
-        setIsVideoOff(false);
-        setCallDuration(0);
     }, []);
+
+    const startWebRTC = useCallback(async (isCaller) => {
+        try {
+            const stream = await getMediaStream(callType);
+            const pc = createPeerConnection();
+
+            stream.getTracks().forEach(track => {
+                pc.addTrack(track, stream);
+            });
+
+            if (isCaller) {
+                const offer = await pc.createOffer();
+                await pc.setLocalDescription(offer);
+                stompClient.current.publish({
+                    destination: '/app/webrtc-offer',
+                    body: JSON.stringify({
+                        targetUserId: remoteUser?.id,
+                        sdp: pc.localDescription
+                    })
+                });
+            }
+
+            setCallState('connected');
+        } catch (err) {
+            console.error('WebRTC start failed:', err);
+            cleanup();
+        }
+    }, [callType, remoteUser, createPeerConnection, cleanup, getMediaStream]);
+
+    const webrtcHandlersRef = useRef({
+        startWebRTC: async () => {},
+        cleanup: () => {},
+        handleOffer: async () => {},
+        handleAnswer: async () => {},
+        handleIceCandidate: async () => {},
+    });
+
+    useEffect(() => {
+        webrtcHandlersRef.current = {
+            startWebRTC,
+            cleanup,
+            handleOffer,
+            handleAnswer,
+            handleIceCandidate,
+        };
+    }, [startWebRTC, cleanup, handleOffer, handleAnswer, handleIceCandidate]);
+
+    // Connect to WebSocket when user is available
+    useEffect(() => {
+        if (!user?.id) return;
+
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        const client = new Client({
+            webSocketFactory: () => new SockJS('http://localhost:8080/ws'),
+            connectHeaders: {
+                Authorization: `Bearer ${token}`
+            },
+            reconnectDelay: 5000,
+            onConnect: () => {
+                console.log('WebSocket connected for calling');
+
+                // Listen for incoming calls
+                client.subscribe(`/user/${user.id}/queue/incoming-call`, (message) => {
+                    const data = JSON.parse(message.body);
+                    console.log('Incoming call:', data);
+                    setRemoteUser({ id: data.callerUserId, name: data.callerName });
+                    setCallType(data.callType || 'video');
+                    setCallState('incoming');
+                });
+
+                // Call accepted
+                client.subscribe(`/user/${user.id}/queue/call-accepted`, (message) => {
+                    const data = JSON.parse(message.body);
+                    console.log('Call accepted:', data);
+                    void webrtcHandlersRef.current.startWebRTC(true);
+                });
+
+                // Call declined
+                client.subscribe(`/user/${user.id}/queue/call-declined`, () => {
+                    console.log('Call declined');
+                    webrtcHandlersRef.current.cleanup();
+                    alert('Call was declined.');
+                });
+
+                // WebRTC offer
+                client.subscribe(`/user/${user.id}/queue/webrtc-offer`, async (message) => {
+                    const data = JSON.parse(message.body);
+                    console.log('Received WebRTC offer');
+                    await webrtcHandlersRef.current.handleOffer(data);
+                });
+
+                // WebRTC answer
+                client.subscribe(`/user/${user.id}/queue/webrtc-answer`, async (message) => {
+                    const data = JSON.parse(message.body);
+                    console.log('Received WebRTC answer');
+                    await webrtcHandlersRef.current.handleAnswer(data);
+                });
+
+                // ICE candidate
+                client.subscribe(`/user/${user.id}/queue/ice-candidate`, async (message) => {
+                    const data = JSON.parse(message.body);
+                    await webrtcHandlersRef.current.handleIceCandidate(data);
+                });
+
+                // Call ended
+                client.subscribe(`/user/${user.id}/queue/call-ended`, () => {
+                    console.log('Call ended by remote');
+                    webrtcHandlersRef.current.cleanup();
+                });
+            },
+            onStompError: (frame) => {
+                console.error('STOMP error:', frame);
+            }
+        });
+
+        client.activate();
+        stompClient.current = client;
+
+        return () => {
+            if (client.active) client.deactivate();
+        };
+    }, [user?.id]);
 
     // Public API
     const callUser = (targetUserId, targetUserName, type = 'video') => {
@@ -315,7 +334,7 @@ export const CallProvider = ({ children }) => {
             })
         });
 
-        startWebRTC(false);
+        void startWebRTC(false);
     };
 
     const declineCall = () => {

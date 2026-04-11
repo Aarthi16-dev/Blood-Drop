@@ -1,6 +1,5 @@
 import { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../services/api';
 import { AuthContext } from '../context/AuthContext';
 import { UserPlus, Navigation, ShieldCheck } from 'lucide-react';
 

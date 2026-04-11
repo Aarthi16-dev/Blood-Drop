@@ -1,11 +1,11 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext, useCallback } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import api from '../services/api';
 import { Mail, Phone, Clock, Send, Inbox, CheckCircle, RefreshCcw, Heart, Check } from 'lucide-react';
 
 const Dashboard = () => {
     const { user, refreshUser } = useContext(AuthContext);
-    const [allMessages, setAllMessages] = useState([]);
+    const [, setAllMessages] = useState([]);
     const [conversations, setConversations] = useState({});
     const [selectedConversationId, setSelectedConversationId] = useState(null);
     const [replyText, setReplyText] = useState('');
@@ -23,7 +23,7 @@ const Dashboard = () => {
         allKeys: user ? Object.keys(user) : []
     });
 
-    const fetchMessages = async () => {
+    const fetchMessages = useCallback(async () => {
         console.log("fetchMessages called, checking user.id:", user?.id);
         if (user?.id) {
             setLoading(true);
@@ -41,7 +41,6 @@ const Dashboard = () => {
 
                     // Determine the "other" person in the conversation
                     const isMeSender = Number(msg.senderId) === Number(user.id);
-                    const isMeDonor = Number(msg.donorId) === Number(user.id);
 
                     // If it's a system message (senderId is null), use a special 'system' ID
                     // But if it's a blood request alert, maybe group it by request info? 
@@ -79,11 +78,11 @@ const Dashboard = () => {
                 setRefreshing(false);
             }
         }
-    };
+    }, [user?.id]);
 
     useEffect(() => {
         fetchMessages();
-    }, [user?.id]);
+    }, [fetchMessages]);
 
     const handleManualRefresh = () => {
         setRefreshing(true);

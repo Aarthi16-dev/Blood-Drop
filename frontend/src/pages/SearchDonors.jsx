@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext, startTransition } from 'react';
 import api from '../services/api';
 import { AuthContext } from '../context/AuthContext';
 import { Search, MapPin, Droplets, Phone, X, Navigation, Mail } from 'lucide-react';
@@ -43,22 +43,26 @@ const SearchDonors = () => {
     // Sync form with user context
     useEffect(() => {
         if (user) {
-            setMessageForm(prev => ({
-                ...prev,
-                senderName: user.name || '',
-                contactNumber: user.phoneNumber || ''
-            }));
+            startTransition(() => {
+                setMessageForm(prev => ({
+                    ...prev,
+                    senderName: user.name || '',
+                    contactNumber: user.phoneNumber || ''
+                }));
+            });
 
             if (user.latitude && user.longitude && !userLocation.latitude) {
                 console.log("Initializing userLocation from profile:", user.latitude, user.longitude);
-                setUserLocation({ latitude: user.latitude, longitude: user.longitude });
-                setRealUserLocation({ latitude: user.latitude, longitude: user.longitude });
+                startTransition(() => {
+                    setUserLocation({ latitude: user.latitude, longitude: user.longitude });
+                    setRealUserLocation({ latitude: user.latitude, longitude: user.longitude });
+                });
             } else if (!userLocation.latitude && (user.location || user.city)) {
                 // Placeholder for future geocoding based on user.location/city if coords not available
                 // For now, it will rely on getLocation() or manual search.
             }
         }
-    }, [user]);
+    }, [user, userLocation.latitude]);
 
 
 
@@ -192,8 +196,12 @@ const SearchDonors = () => {
             map.setView([displayUserLat, displayUserLon], 11);
         }
 
-        setMarkers(newMarkers);
-    }, [donors, map, userLocation, realUserLocation, focusedDonorId]);
+        startTransition(() => {
+            setMarkers(newMarkers);
+        });
+        // markers intentionally omitted: including it would re-run on every marker rebuild
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- sync map layers to donors/map/location focus only
+    }, [donors, map, userLocation, realUserLocation, focusedDonorId, displayUserLat, displayUserLon]);
 
     const geocodeMissingDonors = async (donorList) => {
         donorList.forEach(async (donor, index) => {
@@ -232,8 +240,8 @@ const SearchDonors = () => {
         if (e) e.preventDefault();
         setLoading(true);
         try {
-            let searchLat = lat;
-            let searchLon = lon;
+            let _searchLat = lat;
+            let _searchLon = lon;
             const isExplicitCoords = lat !== undefined;
 
             // Geocode explicit search text if they typed a string and are not explicitly clicking/supplying coordinates right now
@@ -247,8 +255,8 @@ const SearchDonors = () => {
                     const geoData = await geoRes.json();
 
                     if (geoData && geoData.length > 0) {
-                        searchLat = parseFloat(geoData[0].lat);
-                        searchLon = parseFloat(geoData[0].lon);
+                        _searchLat = parseFloat(geoData[0].lat);
+                        _searchLon = parseFloat(geoData[0].lon);
                         setLocationStatus(`Location found: ${geoData[0].display_name.split(',')[0]}`);
                     }
                 } catch (geoErr) {
@@ -266,7 +274,7 @@ const SearchDonors = () => {
                                 const res = await fetch(url, { headers: { 'User-Agent': 'BloodDropApp' } });
                                 if (res.status === 200) return await res.json();
                                 if (res.status === 429 || res.status === 403) await new Promise(r => setTimeout(r, 2000));
-                            } catch (e) {
+                            } catch {
                                 await new Promise(r => setTimeout(r, 1000));
                             }
                         }
@@ -274,8 +282,8 @@ const SearchDonors = () => {
                     };
                     const geoData = await fetchWithRetry(`https://nominatim.openstreetmap.org/search?format=json&postalcode=${pincode}&countrycodes=in&limit=1`);
                     if (geoData && geoData.length > 0) {
-                        searchLat = parseFloat(geoData[0].lat);
-                        searchLon = parseFloat(geoData[0].lon);
+                        _searchLat = parseFloat(geoData[0].lat);
+                        _searchLon = parseFloat(geoData[0].lon);
                         setLocationStatus(`Pincode area found: ${geoData[0].display_name.split(',')[0]}`);
                     } else {
                         setLocationStatus('Could not locate pincode. Searching by name.');
@@ -328,6 +336,7 @@ const SearchDonors = () => {
         if (realUserLocation.latitude && realUserLocation.longitude && donors.length === 0 && !loading) {
             handleSearch(null, realUserLocation.latitude, realUserLocation.longitude);
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- auto-search once when geolocation lat is set
     }, [realUserLocation.latitude]);
 
     const getLocation = () => {

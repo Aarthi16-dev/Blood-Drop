@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect } from 'react';
+import { useState, useContext, useEffect, startTransition } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { AuthContext } from '../context/AuthContext';
@@ -37,13 +37,17 @@ const BloodRequest = () => {
 
     useEffect(() => {
         if (user && user.latitude && !userLocation.latitude) {
-            setUserLocation({ latitude: user.latitude, longitude: user.longitude });
-            setFormData(prev => ({ ...prev, latitude: user.latitude, longitude: user.longitude, city: user.city || prev.city }));
-            setLocationStatus('Using registered location');
+            startTransition(() => {
+                setUserLocation({ latitude: user.latitude, longitude: user.longitude });
+                setFormData(prev => ({ ...prev, latitude: user.latitude, longitude: user.longitude, city: user.city || prev.city }));
+                setLocationStatus('Using registered location');
+            });
         } else if (user && !userLocation.latitude) {
-            setFormData(prev => ({ ...prev, city: user.city || prev.city, contactNumber: user.phoneNumber || prev.contactNumber, patientName: user.name || prev.patientName }));
+            startTransition(() => {
+                setFormData(prev => ({ ...prev, city: user.city || prev.city, contactNumber: user.phoneNumber || prev.contactNumber, patientName: user.name || prev.patientName }));
+            });
         }
-    }, [user]);
+    }, [user, userLocation.latitude]);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -73,7 +77,7 @@ const BloodRequest = () => {
                 params: { latitude: userLocation.latitude, longitude: userLocation.longitude, bloodGroup: formData.bloodGroup }
             }).then(res => setDonors(res.data)).catch(console.error);
         }
-    }, [formData.bloodGroup, userLocation.latitude]);
+    }, [formData.bloodGroup, userLocation.latitude, userLocation.longitude]);
 
     useEffect(() => {
         const initMap = () => {
@@ -160,14 +164,18 @@ const BloodRequest = () => {
                 if (layerGroup.getBounds().isValid()) {
                     map.fitBounds(layerGroup.getBounds().pad(0.2), { animate: true });
                 }
-            } catch (e) {
+            } catch {
                 if (userLocation.latitude) map.setView([userLocation.latitude, userLocation.longitude], 11);
             }
         } else if (userLocation.latitude) {
             map.setView([userLocation.latitude, userLocation.longitude], 11);
         }
 
-        setMarkers(newMarkers);
+        startTransition(() => {
+            setMarkers(newMarkers);
+        });
+        // markers intentionally omitted: including it would re-run on every marker rebuild
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- sync map layers to donors/map/userLocation only
     }, [donors, map, userLocation]);
 
     const handleSubmit = async (e) => {

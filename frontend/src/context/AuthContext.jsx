@@ -1,19 +1,18 @@
-import { createContext, useState, useEffect } from 'react';
+import { createContext, useState } from 'react';
 import AuthService from '../services/auth.service';
 
+// eslint-disable-next-line react-refresh/only-export-components -- context + provider stay together for this app
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        const u = AuthService.getCurrentUser();
-        if (u) {
-            setUser(u);
+    const [user, setUser] = useState(() => {
+        try {
+            return AuthService.getCurrentUser() ?? null;
+        } catch {
+            return null;
         }
-        setLoading(false);
-    }, []);
+    });
+    const [loading] = useState(false);
 
     const login = async (email, password) => {
         try {
