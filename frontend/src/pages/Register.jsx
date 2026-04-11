@@ -99,7 +99,11 @@ const Register = () => {
                     message = err.response.data;
                 } else if (err.response.data.message) {
                     message = err.response.data.message;
+                } else if (err.response.data.error) {
+                    message = err.response.data.error;
                 }
+            } else if (err.message) {
+                message = err.message;
             }
             setError(message);
         } finally {

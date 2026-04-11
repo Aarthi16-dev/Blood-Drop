@@ -29,7 +29,7 @@ public class AuthenticationController {
                 errorMessage += " | Cause: " + e.getCause().getMessage();
             }
             System.err.println(errorMessage);
-            return ResponseEntity.badRequest().body(errorMessage);
+            return ResponseEntity.badRequest().body(java.util.Map.of("message", errorMessage));
         }
     }
 
