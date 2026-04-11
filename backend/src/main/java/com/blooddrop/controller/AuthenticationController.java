@@ -6,10 +6,10 @@ import com.blooddrop.dto.AuthenticationResponse;
 import com.blooddrop.dto.RegisterRequest;
 import com.blooddrop.entity.User;
 import com.blooddrop.service.AuthenticationService;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -40,22 +40,16 @@ public class AuthenticationController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<UserResponse> getCurrentUser(
-            @AuthenticationPrincipal org.springframework.security.core.userdetails.User principal) {
-
+    public ResponseEntity<UserResponse> getCurrentUser(@AuthenticationPrincipal User principal) {
         if (principal == null) {
             return ResponseEntity.status(401).build();
         }
 
-        String email = principal.getUsername();
-
-        User user = service.findByEmail(email);
-
         UserResponse response = new UserResponse(
-                user.getId(),
-                user.getName(),
-                user.getBloodGroup(),
-                user.getEmail()
+                principal.getId(),
+                principal.getName(),
+                principal.getBloodGroup(),
+                principal.getEmail()
         );
 
         return ResponseEntity.ok(response);
@@ -70,4 +64,4 @@ public class AuthenticationController {
             "timestamp", java.time.LocalDateTime.now().toString()
         ));
     }
-}
+}
