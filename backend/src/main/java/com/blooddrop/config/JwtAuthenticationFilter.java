@@ -29,6 +29,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain) throws ServletException, IOException {
 
+        final String requestURI = request.getRequestURI();
+        if (requestURI.contains("/api/v1/auth/")) {
+            System.out.println("Processing public request: " + requestURI);
+        }
+
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
         final String userEmail;
