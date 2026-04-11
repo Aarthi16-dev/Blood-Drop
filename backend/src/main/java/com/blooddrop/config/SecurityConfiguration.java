@@ -26,6 +26,9 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public class SecurityConfiguration {
 
+    @org.springframework.beans.factory.annotation.Value("${app.cors.allowed-origins}")
+    private String allowedOrigins;
+
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
 
@@ -34,11 +37,13 @@ public class SecurityConfiguration {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.setAllowedOrigins(Arrays.asList(
-            "https://blood-drop-theta.vercel.app",
-            "http://localhost:5173",
-            "http://localhost:3000"
-        ));
+        
+        if (allowedOrigins != null && !allowedOrigins.isEmpty()) {
+            config.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
+        } else {
+            config.setAllowedOrigins(Arrays.asList("*"));
+        }
+        
         config.setAllowedOriginPatterns(Arrays.asList("*"));
         config.setAllowedHeaders(Arrays.asList("*"));
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
