@@ -64,20 +64,40 @@ const Register = () => {
             
             // Auto-geocode if coordinates are missing
             if (!payload.latitude || !payload.longitude) {
+                console.log("🌐 No coordinates provided. Starting auto-geocoding for:", payload.city);
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => {
+                    console.warn("⏲️ Geocoding timed out after 3 seconds. Proceeding without coordinates.");
+                    controller.abort();
+                }, 3000);
+
                 try {
                     const query = `${payload.city}${payload.pincode ? ', ' + payload.pincode : ''}, India`;
                     const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`, {
-                        headers: { 'Accept-Language': 'en', 'User-Agent': 'BloodDropApp' }
+                        headers: { 'Accept-Language': 'en', 'User-Agent': 'BloodDropApp' },
+                        signal: controller.signal
                     });
                     const geoData = await geoRes.json();
+                    clearTimeout(timeoutId);
+                    
                     if (geoData && geoData.length > 0) {
+                        console.log("📍 Geocoding success:", geoData[0].lat, geoData[0].lon);
                         payload.latitude = parseFloat(geoData[0].lat);
                         payload.longitude = parseFloat(geoData[0].lon);
+                    } else {
+                        console.warn("❓ Geocoding returned no results.");
                     }
                 } catch (geoErr) {
-                    console.error("Auto-geocoding failed", geoErr);
+                    clearTimeout(timeoutId);
+                    if (geoErr.name === 'AbortError') {
+                        console.log("⏭️ Proceeding after geocoding timeout.");
+                    } else {
+                        console.error("❌ Auto-geocoding failed", geoErr);
+                    }
                 }
             }
+
+            console.log("📤 Sending registration payload to backend...");
 
             if (payload.role === 'DONOR') {
                 payload.age = parseInt(payload.age);
