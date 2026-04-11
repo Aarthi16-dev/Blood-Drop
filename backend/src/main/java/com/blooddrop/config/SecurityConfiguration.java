@@ -16,15 +16,22 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfiguration {
+
+    private static final Logger log = LoggerFactory.getLogger(SecurityConfiguration.class);
 
     private final String allowedOrigins;
     private final JwtAuthenticationFilter jwtAuthFilter;
@@ -45,27 +52,35 @@ public class SecurityConfiguration {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
 
-        // Explicit origins only (required when allowCredentials=true). Do not mix with pattern "*".
-        List<String> origins = (allowedOrigins == null || allowedOrigins.isBlank())
-                ? List.of()
-                : Arrays.stream(allowedOrigins.split(","))
-                .map(String::trim)
-                .filter(s -> !s.isEmpty())
-                .collect(Collectors.toList());
-        if (origins.isEmpty()) {
-            origins = List.of(
-                    "http://localhost:5173",
-                    "http://localhost:3000",
-                    "https://blood-drop-theta.vercel.app"
-            );
+        Set<String> patterns = new LinkedHashSet<>(parseOriginList(allowedOrigins));
+        if (patterns.isEmpty()) {
+            patterns.add("http://localhost:5173");
+            patterns.add("http://localhost:3000");
+            patterns.add("https://blood-drop-theta.vercel.app");
         }
-        config.setAllowedOrigins(origins);
+        // Patterns work more reliably for preflight + credentials than setAllowedOrigins alone (Spring 6 / some proxies).
+        patterns.add("http://localhost:*");
+        patterns.add("http://127.0.0.1:*");
 
-        config.setAllowedHeaders(List.of("*"));
-        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+        config.setAllowedOriginPatterns(new ArrayList<>(patterns));
+        log.info("CORS allowed origin patterns: {}", patterns);
+
+        config.setAllowedHeaders(List.of(CorsConfiguration.ALL));
+        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD"));
         config.setMaxAge(3600L);
         source.registerCorsConfiguration("/**", config);
         return source;
+    }
+
+    private static List<String> parseOriginList(String raw) {
+        if (raw == null || raw.isBlank()) {
+            return List.of();
+        }
+        return Arrays.stream(raw.split(","))
+                .map(String::trim)
+                .map(s -> s.replace("\"", "").replace("'", ""))
+                .filter(s -> !s.isEmpty() && !"*".equals(s))
+                .collect(Collectors.toList());
     }
 
     @Bean
@@ -74,9 +89,8 @@ public class SecurityConfiguration {
                 .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // ☢️ NUCLEAR PERMIT: Auth paths must be absolute top priority
-                        .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/", "/error").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/donors/search").permitAll()
                         .requestMatchers("/ws/**").permitAll()
