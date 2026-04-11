@@ -30,8 +30,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull FilterChain filterChain) throws ServletException, IOException {
 
         final String requestURI = request.getRequestURI();
+        // NUCLEAR BYPASS: Completely skip this filter for authentication endpoints
         if (requestURI.contains("/api/v1/auth/")) {
-            System.out.println("Processing public request: " + requestURI);
+            System.out.println("☢️ NUCLEAR BYPASS: Skipping JWT filter for public path: " + requestURI);
+            filterChain.doFilter(request, response);
+            return;
         }
 
         final String authHeader = request.getHeader("Authorization");

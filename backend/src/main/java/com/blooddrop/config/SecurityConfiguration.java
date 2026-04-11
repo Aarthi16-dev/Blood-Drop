@@ -48,31 +48,39 @@ public class SecurityConfiguration {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
+        return http
                 .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/v1/auth/register").permitAll()
+                        // ☢️ NUCLEAR PERMIT: Auth paths must be absolute top priority
+                        .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/", "/error").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/donors/search").permitAll()
-                        .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/ws/**").permitAll()
-                        .anyRequest().authenticated())
-                .exceptionHandling(ex -> ex
-                        .authenticationEntryPoint(unauthorizedHandler()))
-                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                        .anyRequest().authenticated()
+                )
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-
-        return http.build();
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(unauthorizedHandler())
+                )
+                .build();
     }
 
     @Bean
     public AuthenticationEntryPoint unauthorizedHandler() {
         return (request, response, authException) -> {
-            System.err.println("Unauthorized error: " + authException.getMessage());
-            System.err.println("Requested Path: " + request.getRequestURI());
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Error: Unauthorized");
+            System.err.println("🚨 401 Unauthorized Diagnostic:");
+            System.err.println("Path: " + request.getRequestURI());
+            System.err.println("Method: " + request.getMethod());
+            System.err.println("Origin: " + request.getHeader("Origin"));
+            System.err.println("Reason: " + authException.getMessage());
+            
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.getWriter().write("{\"message\":\"Unauthorized Access - 401\",\"path\":\"" + request.getRequestURI() + "\",\"reason\":\"" + authException.getMessage() + "\"}");
         };
     }
 }
