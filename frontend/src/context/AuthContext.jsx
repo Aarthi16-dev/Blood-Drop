@@ -51,6 +51,8 @@ export const AuthProvider = ({ children }) => {
 
     const register = async (userData) => {
         try {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
             const response = await AuthService.register(userData);
             if (response.data.token) {
                 localStorage.setItem('token', response.data.token);
